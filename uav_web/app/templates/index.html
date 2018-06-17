@@ -1,0 +1,8 @@
+{% extends "old_base.html" %}
+
+{% block title %}首页{% endblock %}
+
+{% block page_content %}
+    <h1>你好！ {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}未登录{% endif %}!</h1>
+{% endblock %}
+

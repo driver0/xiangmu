@@ -1,0 +1,146 @@
+{% extends "bootstrap/base.html" %}
+
+{% block html_attribs %} lang="zh-cmn-Hans" {% endblock html_attribs %}
+{% block title %}基于无人机的气体捡漏系统{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <!-- 当前图标　-->
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+        <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+        <!-- Kendo UI 图标需要的样式文件 -->
+        <link rel="stylesheet" href="https://o.qcloud.com/static_api/v3/assets/kendoui-2015.2.624/styles/kendo.common.min.css" />
+        <link rel="stylesheet" href="https://o.qcloud.com/static_api/v3/assets/kendoui-2015.2.624/styles/kendo.default.min.css" />
+        <!-- 当前样式 -->
+        <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet" type="text/css">
+        <link href="{{ url_for('static', filename='sb-admin.css') }}" rel="stylesheet" type="text/css">
+        <link href="{{ url_for('static', filename='sb-bk-theme.css') }}" rel="stylesheet" type="text/css">
+        <!-- bootstrap fileinput 插件样式表 -->
+        <link href="{{ url_for('static', filename='fileinput/fileinput.min.css') }}" rel="stylesheet" type="text/css">
+{% endblock head %}
+
+{% block body %}
+    <div id="wrapper">
+        <!-- Navigation -->
+        {% block navbar %}
+            <!-- 务必使用 <nav> 元素，或者，如果使用的是通用的 <div> 元素的话，务必为导航条设置 role="navigation" 属性 -->
+            <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="{{ url_for('main.index') }}">Web 展示控制界面</a>
+                </div>
+                <!-- 用户资料和顶部用户下拉菜单以随屏幕大小可折叠的方式呈现-->
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        {% if current_user.is_authenticated %}
+                            <li><a href="{{ url_for('main.user', username=current_user.username) }}">用户资料</a></li>
+                        {% endif %}
+                    </ul>
+                    <!-- Top Menu Items -->
+                    <ul class="nav navbar-nav navbar-right">
+                        {% if current_user.is_authenticated %}
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <span class="glyphicon glyphicon-user"></span>
+                                    账户 
+                                    <!-- 通过使用三角符号可以指示某个元素具有下拉菜单功能，<span class="caret"></span> 可以显示三角符号 -->
+                                    <b class="caret"></b>
+                                </a>
+                                <!--下拉导航包含的实际内容-->
+                                <ul class="dropdown-menu">
+                                    <li><a href="{{ url_for('auth.change_password') }}">修改登录密码</a></li>
+                                    <li><a href="{{ url_for('auth.change_email_request') }}">修改邮箱</a></li>
+                                    <li><a href="{{ url_for('auth.logout') }}">退出登录</a></li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li><a href="{{ url_for('auth.login') }}">登录系统</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+                <div class="collapse navbar-collapse" id="navbar-ex1-collapse">
+                    <ul class="nav navbar-nav side-nav">
+                        {% set navigation_bar = [
+                        (url_for('main.views'), 'index', '实时监控', 'glyphicon glyphicon-eye-open'),
+                        (url_for('main.point'), 'deploy_task', '定点定位', 'glyphicon glyphicon-pencil'),
+                        (url_for('main.nopoint'), 'issue_task', '无定点定位', 'glyphicon glyphicon-send')] %}
+                        {% set active_page = active_page|default('monitoring') %}
+                        {% for href, id, caption, icon_class in navigation_bar %}
+                            <li {% if active_page == id %} class="active" {% endif %}>
+                                <a href="{{ href|e }}"><span class="{{ icon_class }}"></span> {{ caption|e }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+            </nav>
+        {% endblock navbar%}
+        {% block content %}
+        <div id="page-wrapper">
+            <div class="container-fluid">
+                <!-- Page Heading -->
+                <div class="row page-header-box">
+                    <div class="col-lg-12">
+                       <h1 class="page-header">
+                           {% block page_header %}{% endblock page_header %}
+                       </h1>
+                    </div>
+                </div>
+                <!-- /.row -->
+                <!-- Alert warnning-->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <!-- 在基模板中渲染 Flash 消息，这样所有的页面都能使用这些消息。 -->
+                        <!-- Flask 把 get_flashed_message() 函数开放给模板，用来获取并渲染消息 -->
+                        {% for message in get_flashed_messages() %}
+                        <!-- 将任意文本和一个可选的关闭按钮组合在一起就组成一个警告框，alert 类是必须要设置的， -->
+                        <!-- 还可以提供有特殊意义的4个类(例如 .alert-info )，代表不同的警告信息。-->
+                         <div class="alert alert-info alert-dismissable" role="alert">
+                            <!-- 为警告框添加一个可选的 .alert-dismissible 类和一个关闭按钮，就可以形成一个可关闭的警告框-->
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- /.row -->
+                {% block page_content %}{% endblock page_content %}
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+        <!-- /#page-wrapper -->
+        {% endblock content %}
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- 服务器使用与用户所在的地理位置无关的协调世界时间 UTC ，将服务器的 UTC 时间转换成当地时间由 Web 浏览器完成 -->
+    <!-- 为 Flask-Moment 引入 moment.js 这个 javascript 库， 它可以在浏览器中渲染日期和时间 -->
+    <!-- 在基模板的 scripts 块中引入 moment.js 库，为了处理时间戳，Flask-Moment 向模板开放了 moment 类 -->
+    {% block scripts %}
+        {{ super() }}
+        <!-- 包括所有kendoui的js插件或者可以根据需要使用的js插件调用　-->
+        <script src="https://o.qcloud.com/static_api/v3/assets/kendoui-2015.2.624/js/kendo.all.min.js"></script>
+         <!-- bootstrap fileinput 插件 js 文件 -->
+        <script src="{{ url_for('static', filename='fileinput/fileinput.min.js') }}"></script>
+        <!-- bootstrap fileinput 插件 js 中文文件 -->
+        <script src="{{ url_for('static', filename='fileinput/zh.js') }}"></script>
+        <!-- 引入 Echarts 文件 -->
+        <script src="{{ url_for('static', filename='echarts.min.js') }}"></script>
+        <!-- 以下两个插件用于在IE8以及以下版本浏览器支持HTML5元素和媒体查询，如果不需要用可以移除 -->
+        <!--[if lt IE 9]>
+        <script src="https://o.qcloud.com/static_api/v3/assets/js/html5shiv.min.js"></script>
+        <script src="https://o.qcloud.com/static_api/v3/assets/js/respond.min.js"></script>
+        <![endif]-->
+        {{ moment.include_moment() }}
+        <script>
+            var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+        </script>
+    {% endblock %}
+{% endblock body %}
+

@@ -1,0 +1,8 @@
+你好！ {{ user.username }},
+
+请确认你的新邮箱地址，通过点击以下链接:
+
+{{ url_for('auth.change_email', token=token, _external=True) }}
+
+来自，“基于无人机的气体捡漏系统”
+
